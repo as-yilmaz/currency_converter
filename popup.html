@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ayarlar</title>
+  <link rel="stylesheet" href="popup.css">
+  <script src="currency_data.js"></script>
+  <script src="translations.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 id="app_title">Hızlı Döviz Çevirici</h1>
+      <div class="toggle-container">
+        <label class="switch">
+          <input type="checkbox" id="extension-toggle" checked>
+          <span class="slider round"></span>
+        </label>
+        <span id="lbl_extension_toggle" style="font-size: 0.8em; margin-left: 8px; vertical-align: middle; display:none;">Enable</span> 
+      </div>
+    </header>
+
+    <main>
+      <div class="setting-item">
+        <label for="language-select" id="lbl_language">Dil/Language</label>
+        <select id="language-select">
+        </select>
+      </div>
+
+      <div class="setting-item">
+        <label for="display-format" id="lbl_display_format">Gösterim Formatı</label>
+        <select id="display-format">
+          <option value="code" id="opt_format_code">Sadece Kod (USD)</option>
+          <option value="country" id="opt_format_country">Sadece Ülke (United States)</option>
+          <option value="both_code" id="opt_format_both">Kod + Ülke (USD - United States)</option>
+        </select>
+      </div>
+      
+      <div class="setting-item">
+        <label for="target-currency" id="lbl_target_currency">Hedef Para Birimi</label>
+        <select id="target-currency">
+        </select>
+      </div>
+
+      <div class="setting-item">
+        <label for="theme-select" id="lbl_theme">Tema</label>
+        <select id="theme-select">
+          <option value="system" id="opt_theme_system">Sistem Teması</option>
+          <option value="light" id="opt_theme_light">Aydınlık</option>
+          <option value="dark" id="opt_theme_dark">Karanlık</option>
+        </select>
+      </div>
+    </main>
+
+    <footer>
+      <p id="footer_text">Otomatik olarak seçili metindeki fiyatı algılar.</p>
+    </footer>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
