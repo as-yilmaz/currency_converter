@@ -205,7 +205,7 @@ function parseAndConvert(text, selection) {
       const lastPart = parts[parts.length - 1];
       if (lastPart.length === 2) {
           amountStr = amountStr.replace(',', '.');
-      } else if (parts.length > 1 && lastPart.length === 3) {
+      } else if (parts.length > 1 && lastPart.length === 3 && parts[0] !== '0') {
           amountStr = amountStr.replace(/,/g, '');
       } else {
            amountStr = amountStr.replace(',', '.');
@@ -217,8 +217,7 @@ function parseAndConvert(text, selection) {
            amountStr = amountStr.replace(/\./g, '');
        } else if (parts.length === 2 && parts[1].length === 3) {
            const likelyCurrency = detectedCurrencies[0];
-           const thousandSeparatorCurrencies = ['TRY', 'EUR', 'PLN', 'BRL', 'IDR', 'CLP', 'COP', 'HRK', 'RON', 'RUB', 'VND', 'DKK', 'SEK', 'NOK', 'ISK'];
-           if (thousandSeparatorCurrencies.includes(likelyCurrency)) {
+           if (thousandSeparatorCurrencies.includes(likelyCurrency) && parts[0] !== '0') {
                amountStr = amountStr.replace(/\./g, '');
            }
        }
