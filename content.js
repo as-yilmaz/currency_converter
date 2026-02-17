@@ -96,18 +96,75 @@ document.addEventListener('mousedown', (e) => {
  * Handles text selection events.
  * Validates the selection length and triggers parsing if valid.
  */
+/**
+ * Handles text selection events.
+ * Validates the selection length and triggers parsing if valid.
+ */
 function handleSelection(e) {
   if (!isEnabled) return;
-  if (tooltip && tooltip.contains(e.target)) return;
+  // Check if tooltip contains target (need to check composed path for shadow dom)
+  const composedPath = e.composedPath ? e.composedPath() : [];
+  const target = composedPath.length > 0 ? composedPath[0] : e.target;
+  
+  if (tooltip && (tooltip.contains(target) || tooltip.contains(e.target))) return;
+
+  // Capture path before timeout to ensure we have the event context
+  const eventPath = composedPath;
 
   setTimeout(() => {
-    const selection = window.getSelection();
+    const selection = getDeepSelection(eventPath); 
+    if (!selection) return;
+    
     const text = selection.toString().trim();
 
     if (text.length > 0 && text.length < 50) { 
       parseAndConvert(text, selection);
     }
   }, 100);
+}
+
+/**
+ * Traverses Shadow DOMs to find the actual text selection.
+ * Uses event path for reliability, falls back to activeElement recursion.
+ */
+function getDeepSelection(path) {
+    // 1. Check event path for ShadowRoots (Most reliable for mouse interactions)
+    if (path && path.length) {
+        for (const node of path) {
+            // Check if node is a ShadowRoot (nodeType 11) and has getSelection
+            if (node instanceof ShadowRoot && node.getSelection) {
+                const sel = node.getSelection();
+                if (sel && sel.toString().trim().length > 0) return sel;
+            }
+        }
+    }
+
+    // 2. Try standard window selection
+    let sel = window.getSelection();
+    if (sel && sel.toString().trim().length > 0) return sel;
+    
+    // 3. Fallback: Recursive drill-down starting from the active element
+    return findSelectionInShadow(document.activeElement);
+}
+
+/**
+ * Helper to recursively find selection in shadow roots
+ */
+function findSelectionInShadow(element) {
+    if (!element || !element.shadowRoot) return null;
+    
+    // Check selection in this shadow root
+    if (element.shadowRoot.getSelection) {
+        const shadowSel = element.shadowRoot.getSelection();
+        if (shadowSel && shadowSel.toString().trim().length > 0) return shadowSel;
+    }
+    
+    // Recursively check if there is a deeper active element within this shadow root
+    if (element.shadowRoot.activeElement) {
+        return findSelectionInShadow(element.shadowRoot.activeElement);
+    }
+    
+    return null;
 }
 
 /**
@@ -182,7 +239,7 @@ function parseAndConvert(text, selection) {
   }
   
   if (!resolutionOriginal) {
-      const cleanSym = symbol.replace(/[.,\s]/g, '');
+      const cleanSym = symbol.replace(/[.,\s+\-]/g, '');
        if (CURRENCY_SYMBOLS[cleanSym]) resolutionOriginal = CURRENCY_SYMBOLS[cleanSym];
        else if (rates && rates[cleanSym.toUpperCase()]) resolutionOriginal = cleanSym.toUpperCase();
   }
