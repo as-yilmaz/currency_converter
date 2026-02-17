@@ -1,19 +1,25 @@
 :root {
-  --primary-color: #F3B3A6;
+  --primary-color: #883020;
+  /* Matches text-color for consistency */
+
+  /* Light Mode Defaults */
   --bg-color: #eeeeee;
-  --text-color: #222222;
-  --border-color: #d1d5db;
-  --hover-bg: #e5e7eb;
-  --card-bg: #ffffff;
+  --text-color: #883020;
+  --border-color: rgba(136, 48, 32, 0.3);
+  --card-bg: #EAEAEA;
+  --hover-bg: #e0e0e0;
 }
 
 [data-theme="dark"] {
-  --primary-color: #F3B3A6;
+  --primary-color: #FFBBB0;
+  /* Matches text-color for consistency */
+
+  /* Dark Mode Overrides */
   --bg-color: #222222;
-  --text-color: #eeeeee;
-  --border-color: #374151;
-  --hover-bg: #2d2d2d;
-  --card-bg: #2d2d2d;
+  --text-color: #FFBBB0;
+  --border-color: rgba(255, 187, 176, 0.3);
+  --card-bg: #2A2A2A;
+  --hover-bg: #333333;
 }
 
 body {

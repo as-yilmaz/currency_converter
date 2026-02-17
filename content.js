@@ -78,6 +78,23 @@ chrome.storage.onChanged.addListener((changes, area) => {
     if (changes.enabled) isEnabled = changes.enabled.newValue;
     if (changes.displayFormat) displayFormat = changes.displayFormat.newValue;
     if (changes.uiLanguage) uiLanguage = changes.uiLanguage.newValue;
+    if (changes.theme) {
+        // Update existing tooltip if open
+    if (changes.theme) {
+        // Update existing tooltip if open
+        const activeTooltip = tooltip;
+        if (activeTooltip && document.body.contains(activeTooltip)) {
+            activeTooltip.classList.remove('light-mode', 'dark-mode');
+            const newTheme = changes.theme.newValue;
+            if (newTheme === 'system') {
+                 const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                 activeTooltip.classList.add(isDark ? 'dark-mode' : 'light-mode');
+            } else {
+                activeTooltip.classList.add(newTheme === 'dark' ? 'dark-mode' : 'light-mode');
+            }
+        }
+    }
+    }
   }
 });
 
@@ -350,6 +367,22 @@ function showTooltip(results, selection) {
   tooltip = document.createElement('div');
   tooltip.className = 'currency-converter-tooltip';
   
+  const currentTooltip = tooltip;
+  
+  // Apply current theme
+  chrome.storage.local.get(['theme'], (result) => {
+      // If tooltip was closed or replaced, ignore
+      if (!currentTooltip || !document.body.contains(currentTooltip)) return;
+
+      const theme = result.theme || 'system';
+      if (theme === 'system') {
+          const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          currentTooltip.classList.add(isDark ? 'dark-mode' : 'light-mode');
+      } else {
+          currentTooltip.classList.add(theme === 'dark' ? 'dark-mode' : 'light-mode');
+      }
+  });
+  
   let contentHtml = '<div class="cc-content">';
   
   results.forEach(res => {
@@ -370,40 +403,44 @@ function showTooltip(results, selection) {
   });
   
   contentHtml += '</div><div class="cc-arrow"></div>';
-  tooltip.innerHTML = contentHtml;
+  currentTooltip.innerHTML = contentHtml;
 
-  document.body.appendChild(tooltip);
+  document.body.appendChild(currentTooltip);
 
-  const tooltipRect = tooltip.getBoundingClientRect();
+  const tooltipRect = currentTooltip.getBoundingClientRect();
   let top = rect.top + window.scrollY - tooltipRect.height - 10;
   let left = rect.left + window.scrollX + (rect.width - tooltipRect.width) / 2;
   
   if (top < window.scrollY) {
     top = rect.bottom + window.scrollY + 10;
-    tooltip.classList.add('cc-bottom');
+    currentTooltip.classList.add('cc-bottom');
   } else {
-    tooltip.classList.remove('cc-bottom');
+    currentTooltip.classList.remove('cc-bottom');
   }
   
   if (left < 0) left = 10;
   
-  tooltip.style.top = `${top}px`;
-  tooltip.style.left = `${left}px`;
+  currentTooltip.style.top = `${top}px`;
+  currentTooltip.style.left = `${left}px`;
   
   requestAnimationFrame(() => {
-    tooltip.classList.add('visible');
+    if (currentTooltip && document.body.contains(currentTooltip)) {
+        currentTooltip.classList.add('visible');
+    }
   });
 }
 
 
 function hideTooltip() {
   if (tooltip) {
-    tooltip.classList.remove('visible');
+    const elToHide = tooltip;
+    elToHide.classList.remove('visible');
+    tooltip = null; // Detach global immediately so new tooltips aren't affected
+    
     setTimeout(() => {
-      if (tooltip && tooltip.parentNode) {
-        tooltip.parentNode.removeChild(tooltip);
+      if (elToHide && elToHide.parentNode) {
+        elToHide.parentNode.removeChild(elToHide);
       }
-      tooltip = null;
     }, 200);
   }
 }
